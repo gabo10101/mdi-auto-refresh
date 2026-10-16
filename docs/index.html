@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MDI Auto Refresh</title>
+<meta name="description" content="Install guide: a tiny Chrome extension that refreshes the MD Integrations Encounters list every 30 seconds.">
+<link rel="icon" href="img/icon.png">
+<style>
+  :root {
+    --bg: #f7f8f6; --card: #ffffff; --text: #1d2420; --muted: #5d6862; --line: #e1e5e2;
+    --accent: #1a7f64; --accent-soft: #e5f3ee; --warn: #9a5b00; --warn-soft: #fff4e0; --code: #eef1ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121614; --card: #1a201d; --text: #e6ebe8; --muted: #9aa69f; --line: #2c3430;
+      --accent: #4cc39f; --accent-soft: #173229; --warn: #f0b45c; --warn-soft: #2e2414; --code: #232b27;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121614; --card: #1a201d; --text: #e6ebe8; --muted: #9aa69f; --line: #2c3430;
+    --accent: #4cc39f; --accent-soft: #173229; --warn: #f0b45c; --warn-soft: #2e2414; --code: #232b27;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  main { max-width: 780px; margin: 0 auto; padding: 48px 16px 64px; }
+  header { display: flex; gap: 18px; align-items: center; margin-bottom: 8px; }
+  header img { width: 64px; height: 64px; flex-shrink: 0; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0; }
+  .lede { color: var(--muted); margin: 4px 0 0; }
+  h2 { font-size: 1.35rem; margin: 48px 0 12px; padding-top: 8px; border-top: 1px solid var(--line); }
+  h3 { font-size: 1.05rem; margin: 0 0 4px; }
+  p, li { max-width: 68ch; }
+  a { color: var(--accent); }
+  code, kbd { background: var(--code); border-radius: 6px; padding: 1px 6px; font: 0.9em ui-monospace, Menlo, monospace; overflow-wrap: anywhere; }
+  .download { display: inline-flex; align-items: center; gap: 10px; margin: 24px 0 6px; padding: 14px 22px;
+    background: var(--accent); color: #fff; border-radius: 12px; font-weight: 600; text-decoration: none; font-size: 1.05rem; }
+  :root[data-theme="dark"] .download { color: #0d1a15; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .download { color: #0d1a15; } }
+  .download:hover { filter: brightness(1.08); }
+  .small { font-size: 0.9rem; color: var(--muted); }
+  ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 0; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 18px 18px 18px 64px; margin: 0 0 14px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px; max-width: none; }
+  ol.steps > li::before { content: counter(s); position: absolute; left: 18px; top: 18px; width: 30px; height: 30px;
+    border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700;
+    display: grid; place-items: center; font-size: 0.95rem; }
+  ol.steps p { margin: 4px 0; }
+  .shot { display: block; width: 100%; height: auto; margin-top: 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  .copy { display: inline-flex; gap: 8px; align-items: center; margin-top: 6px; }
+  .copy button { font: inherit; font-size: 0.85rem; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); cursor: pointer; }
+  .copy button:focus-visible, .download:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .note { background: var(--warn-soft); border-left: 4px solid var(--warn); padding: 12px 16px; border-radius: 8px; margin: 14px 0; }
+  .note strong { color: var(--warn); }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; background: var(--bg); border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 0.85rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .badge { display: inline-block; min-width: 44px; text-align: center; padding: 1px 6px; border-radius: 5px;
+    color: #fff; font: 700 0.8rem/1.6 ui-monospace, Menlo, monospace; }
+  .b-on { background: #1a7f64; } .b-r { background: #5f6368; } .b-lock { background: #d93025; }
+  details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin: 10px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }
+  @media (max-width: 520px) {
+    main { padding-top: 28px; } h1 { font-size: 1.6rem; }
+    header { align-items: flex-start; } header img { width: 48px; height: 48px; }
+    ol.steps > li { padding: 56px 16px 16px; } ol.steps > li::before { left: 16px; top: 16px; }
+    th, td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="img/icon.png" alt="" width="64" height="64">
+    <div>
+      <h1>MDI Auto Refresh</h1>
+      <p class="lede">Clicks the ⟳ refresh button on your MD Integrations Encounters list every 30 seconds, even when the tab is in the background.</p>
+    </div>
+  </header>
+
+  <a class="download" href="https://github.com/gabo10101/mdi-auto-refresh/releases/latest/download/mdi-auto-refresh.zip">⬇ Download MDI Auto Refresh (.zip)</a>
+  <p class="small">For Google Chrome on Mac. Free, open source, about 2 minutes to set up. Not affiliated with or endorsed by MD Integrations.</p>
+
+  <h2>What it does</h2>
+  <ul>
+    <li>Every <strong>30 seconds</strong> it presses the same ⟳ button you would press on the <em>Encounters</em> list (Assigned, Flagged, Waiting Patient…).</li>
+    <li>It <strong>never touches an open case</strong>, so a reply you are typing is never lost.</li>
+    <li>It shows a <strong>Mac notification</strong> when a new encounter is assigned to you, when MDI locks itself, or when you are logged out.</li>
+    <li>It keeps the Mac from <strong>going to sleep</strong> while the Encounters list is open, and stops Chrome from putting that tab to sleep.</li>
+  </ul>
+
+  <h2>Install (one time)</h2>
+  <ol class="steps">
+    <li>
+      <h3>Download and unzip</h3>
+      <p>Click the green <strong>Download</strong> button above. Open your <em>Downloads</em> folder and double-click <code>mdi-auto-refresh.zip</code>. You get a folder called <code>mdi-auto-refresh</code>.</p>
+      <p>Move this folder to <strong>Documents</strong> and keep it there. Chrome runs the extension from this folder, so <strong>don't delete it</strong>.</p>
+    </li>
+    <li>
+      <h3>Open Chrome's extensions page</h3>
+      <p>Click into Chrome's address bar, type the address below, and press <kbd>Return</kbd>.</p>
+      <div class="copy"><code>chrome://extensions</code><button type="button" id="copybtn">Copy</button></div>
+      <p class="small">(Clicking a link can't open this page; it has to be typed or pasted.)</p>
+    </li>
+    <li>
+      <h3>Turn on “Developer mode”</h3>
+      <p>Click the switch in the <strong>top-right corner</strong>.</p>
+      <img class="shot" src="img/step-devmode.png" alt="Chrome Extensions page with the Developer mode switch in the top-right corner highlighted" width="1000" height="400" loading="lazy">
+    </li>
+    <li>
+      <h3>Click “Load unpacked”</h3>
+      <p>A new row of buttons appears on the left. Click <strong>Load unpacked</strong>, go to <em>Documents</em>, select the <code>mdi-auto-refresh</code> folder, and click <strong>Select</strong>.</p>
+      <img class="shot" src="img/step-load-unpacked.png" alt="The Load unpacked button highlighted, under the Extensions title" width="1000" height="400" loading="lazy">
+    </li>
+    <li>
+      <h3>Check that it's there</h3>
+      <p>A card named <strong>MDI Auto Refresh</strong> appears, with its switch turned on (blue). Leave Developer mode on.</p>
+      <img class="shot" src="img/step-loaded.png" alt="The MDI Auto Refresh extension card, switched on" width="1000" height="520" loading="lazy">
+    </li>
+    <li>
+      <h3>Pin the icon (recommended)</h3>
+      <p>Click the puzzle-piece icon 🧩 to the right of the address bar, then click the 📌 pin next to <strong>MDI Auto Refresh</strong>. The green ⟳ icon now shows its status.</p>
+    </li>
+  </ol>
+
+  <h2>Set up the Mac (one time)</h2>
+  <ol class="steps">
+    <li>
+      <h3>Allow Chrome notifications</h3>
+      <p>Open <strong>System Settings → Notifications → Google Chrome</strong>. Turn on <em>Allow notifications</em> and set the style to <strong>Alerts</strong>, so they stay on screen until you see them.</p>
+    </li>
+    <li>
+      <h3>Keep the Mac awake</h3>
+      <p>The extension stops the Mac from falling asleep on its own. But <strong>closing the lid always puts a MacBook to sleep</strong>, and then nothing runs. When you step away, leave it <strong>plugged in with the lid open</strong>. It's fine if the screen goes dark or locks.</p>
+    </li>
+  </ol>
+
+  <h2>Everyday use</h2>
+  <ol class="steps">
+    <li><h3>Open MDI in Chrome and log in</h3><p>Use Chrome, the same way you always do.</p></li>
+    <li><h3>Go to an Encounters list</h3><p>For example <strong>Assigned</strong>. The address starts with <code>app.mdintegrations.com/tabs/cases/list/</code>.</p></li>
+    <li><h3>Leave that tab open</h3><p>You can switch to other tabs or apps. Refreshing keeps going in the background. Within 30 seconds the icon shows a badge:</p>
+      <table>
+        <tr><th>Badge</th><th>Meaning</th></tr>
+        <tr><td><span class="badge b-on">ON</span></td><td>Working. It is clicking the ⟳ button.</td></tr>
+        <tr><td><span class="badge b-r">R</span></td><td>Still working, but it reloads the whole page because it couldn't find the button (MDI may have changed their site). Please let Gábor know.</td></tr>
+        <tr><td><span class="badge b-lock">LOCK</span></td><td>MDI locked itself after 20 minutes without activity. Type your password in MDI to continue.</td></tr>
+      </table>
+      <p class="small">Hover over the icon to see the time of the last refresh. Clicking a notification takes you straight to the MDI tab.</p>
+    </li>
+  </ol>
+
+  <h2>Good to know</h2>
+  <div class="note"><strong>The 20-minute lock is MDI's own security feature.</strong> After 20 minutes without mouse or keyboard activity, MDI asks for your password. Medical privacy rules (HIPAA) require this automatic lock, so the extension deliberately does <em>not</em> get around it. The list keeps refreshing behind the lock screen, and you get a notification when it happens.</div>
+  <ul>
+    <li><strong>It only works while Chrome is open</strong> and the Mac is awake. If you quit Chrome, it starts again by itself the next time you open Chrome and the MDI list.</li>
+    <li><strong>It only runs on</strong> <code>app.mdintegrations.com</code>. It sends no data anywhere, uses no servers or accounts, and stores nothing except the last “Assigned” number. The full code is public on <a href="https://github.com/gabo10101/mdi-auto-refresh">GitHub</a>.</li>
+    <li>New-case alerts use the <em>Assigned</em> number in MDI's left sidebar. They can arrive up to 30 seconds after the case.</li>
+    <li>MDI also refreshes itself every 20 minutes. This extension just makes it much more frequent.</li>
+    <li>Please use it only on your own MDI account, and follow your employer's rules.</li>
+  </ul>
+
+  <h2>Turn off, update, uninstall</h2>
+  <ul>
+    <li><strong>Pause:</strong> go to <code>chrome://extensions</code> and switch the MDI Auto Refresh card off. Switch it on again to resume.</li>
+    <li><strong>Update:</strong> download the new zip, replace the old <code>mdi-auto-refresh</code> folder in Documents with the new one, then click the small ⟳ on the extension's card in <code>chrome://extensions</code>.</li>
+    <li><strong>Uninstall:</strong> click <strong>Remove</strong> on the card, then delete the folder.</li>
+  </ul>
+
+  <h2>Troubleshooting</h2>
+  <details><summary>The icon shows no badge</summary>
+    <p>Make sure the tab is on an Encounters <em>list</em> (address contains <code>/tabs/cases/list/</code>), not inside a case. Wait 30 seconds. Check that the card in <code>chrome://extensions</code> is switched on.</p></details>
+  <details><summary>I don't get notifications</summary>
+    <p>Check System Settings → Notifications → Google Chrome (step 1 of “Set up the Mac”). Also turn off <em>Focus / Do Not Disturb</em>.</p></details>
+  <details><summary>Chrome says “Disable developer mode extensions”</summary>
+    <p>Click <strong>Keep</strong> or close the message. It appears because the extension isn't from the Chrome Web Store. It is safe.</p></details>
+  <details><summary>It stopped while I was away</summary>
+    <p>Almost always the Mac went to sleep (lid closed, or the battery ran low). Keep it plugged in with the lid open.</p></details>
+  <details><summary>“Manifest file is missing” when loading</summary>
+    <p>You selected the wrong folder. Select the <code>mdi-auto-refresh</code> folder that directly contains <code>manifest.json</code>.</p></details>
+
+  <footer>
+    Made by <strong>Gábor Kiss</strong> · Protected under the <a href="https://github.com/gabo10101/mdi-auto-refresh/blob/main/LICENSE">MIT License</a> · <a href="https://github.com/gabo10101/mdi-auto-refresh">Source code</a><br>
+    “MD Integrations” is a trademark of its owner. This is an independent tool, not affiliated with or endorsed by MD Integrations.
+  </footer>
+</main>
+<script>
+  document.getElementById('copybtn').addEventListener('click', async (e) => {
+    try { await navigator.clipboard.writeText('chrome://extensions'); e.target.textContent = 'Copied ✓'; }
+    catch { e.target.textContent = 'Select & copy it'; }
+  });
+</script>
+</body>
+</html>
