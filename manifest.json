@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
   "name": "MDI Auto Refresh",
-  "version": "1.1",
-  "description": "Clicks the refresh button on the MD Integrations Encounters list every 30 seconds.",
+  "version": "1.2",
+  "description": "Clicks the refresh button on the MD Integrations Encounters list every 30 seconds and logs back in if you get logged out.",
   "minimum_chrome_version": "120",
   "permissions": ["alarms", "scripting", "power", "notifications", "storage"],
   "host_permissions": ["https://app.mdintegrations.com/*"],
   "background": { "service_worker": "background.js" },
   "icons": { "128": "icon.png" },
-  "action": { "default_title": "MDI Auto Refresh", "default_icon": "icon.png" }
+  "action": { "default_title": "MDI Auto Refresh", "default_icon": "icon.png", "default_popup": "popup.html" }
 }

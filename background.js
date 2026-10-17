@@ -16,6 +16,24 @@ function refreshPage() {
   return { clicked: !!btn, assigned: n ? +n[1] : null, locked: !!document.querySelector('app-inactivity-lock-modal') };
 }
 
+// Runs inside the MDI login page. Fills the form like a user would (Angular needs the input events) and submits.
+async function loginPage(email, password) {
+  const pw = document.querySelector('input[type="password"]');
+  const user = document.querySelector('input[type="email"], input[name*="mail" i], input[type="text"]');
+  if (!pw || !user) return false; // form not rendered yet, try again next tick
+  const set = (el, v) => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+  set(user, email);
+  set(pw, password);
+  await new Promise((r) => setTimeout(r, 300)); // let the framework enable the submit button
+  const btn = pw.form?.querySelector('[type="submit"]') || document.querySelector('ion-button[type="submit"], button[type="submit"]');
+  btn ? btn.click() : pw.form?.requestSubmit();
+  return true;
+}
+
 function notify(tabId, title, message) {
   chrome.notifications.create(`${tabId}:${Date.now()}`, { type: 'basic', iconUrl: 'icon.png', title, message, priority: 2 });
 }
@@ -32,20 +50,43 @@ chrome.alarms.onAlarm.addListener(async () => {
   lists.length ? chrome.power.requestKeepAwake('system') : chrome.power.releaseKeepAwake();
 
   const state = await chrome.storage.session.get(null); // per tab: last count / lock / login seen
+  const { email, password, log = [] } = await chrome.storage.local.get(['email', 'password', 'log']);
+  const now = Date.now();
+  const add = (type, n = 1) => log.push({ t: now, type, n }); // popup shows the last 24 h
   for (const tab of tabs) {
     const s = state[tab.id] || {};
-    if (isLogin(tab.url) && !s.login) notify(tab.id, 'MDI: you were logged out', 'Log in again so auto refresh can continue.');
+    if (isLogin(tab.url)) {
+      const auto = email && password;
+      if (!s.login) notify(tab.id, 'MDI: you were logged out', auto ? 'Logging in again automatically.' : 'Log in again so auto refresh can continue.');
+      if (auto && (s.tries || 0) < 3) {
+        let sent = false;
+        try {
+          [{ result: sent }] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: loginPage, args: [email, password] });
+        } catch (e) {}
+        if (sent) { s.tries = (s.tries || 0) + 1; add('login'); }
+      } else if (auto && !s.failed) { // 3 submits and still on the login page: stop, so a wrong password can't lock the account
+        s.failed = true;
+        notify(tab.id, 'MDI: auto login failed', 'Check the password in the extension popup, or log in by hand.');
+      }
+    } else {
+      s.tries = 0;
+      s.failed = false;
+      if (s.login && s.list && !isList(tab.url)) chrome.tabs.update(tab.id, { url: s.list }); // just logged in: back to the list
+    }
     s.login = isLogin(tab.url);
 
     if (isList(tab.url)) {
+      s.list = tab.url;
       chrome.tabs.update(tab.id, { autoDiscardable: false }); // Chrome Memory Saver must not freeze this tab
       let r = {};
       try {
         [{ result: r }] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: refreshPage });
       } catch (e) {}
       if (!r.clicked) chrome.tabs.reload(tab.id); // fallback: if the button ever changes, reload the page instead
+      if (r.clicked) add('refresh');
       if (r.locked && !s.locked) notify(tab.id, 'MDI is locked', 'Inactivity lock: enter your password to continue.');
       if (r.assigned > (s.assigned ?? Infinity)) notify(tab.id, 'MDI: new assigned encounter', `Assigned: ${r.assigned}`);
+      if (r.assigned > (s.assigned ?? Infinity)) add('new', r.assigned - s.assigned);
       s.locked = !!r.locked;
       if (r.assigned != null) s.assigned = r.assigned;
 
@@ -56,5 +97,14 @@ chrome.alarms.onAlarm.addListener(async () => {
     }
     state[tab.id] = s;
   }
+  await chrome.storage.session.set(state);
+  await chrome.storage.local.set({ log: log.filter((e) => now - e.t < 864e5) });
+});
+
+// New credentials from the popup: give auto login a fresh start.
+chrome.storage.onChanged.addListener(async (c, area) => {
+  if (area !== 'local' || !(c.email || c.password)) return;
+  const state = await chrome.storage.session.get(null);
+  for (const s of Object.values(state)) { s.tries = 0; s.failed = false; }
   await chrome.storage.session.set(state);
 });

@@ -1,5 +1,5 @@
 # Developer test (not needed by end users): loads the extension into real Chromium and serves
-# fake MDI pages that mimic MDI's real DOM. Run: python3 tests/test_extension.py  (~70 s)
+# fake MDI pages that mimic MDI's real DOM. Run: python3 tests/test_extension.py  (~105 s)
 import os, tempfile
 from playwright.sync_api import sync_playwright
 
@@ -16,7 +16,10 @@ PAGES = {
     "tabs/cases/list/flagged": LIST % "<app-inactivity-lock-modal></app-inactivity-lock-modal>",
     "tabs/cases/list/waiting": "<html><body>no button here</body></html>",
     "tabs/cases/12345": "<html><body>open case</body></html>",
-    "login": "<html><body>login</body></html>",
+    "tabs/cases/list/expired": LIST % "",
+    "tabs/home": "<html><body>home</body></html>",
+    "login": """<html><body><form onsubmit="if (email.value == 'a@b.c' && pw.value == 'secret') location = '/tabs/home'; return false">
+<input id="email" type="email"><input id="pw" type="password"><button type="submit">Log in</button></form></body></html>""",
 }
 loads = {}
 
@@ -35,7 +38,11 @@ with sync_playwright() as p:
     sw = ctx.service_workers[0] if ctx.service_workers else ctx.wait_for_event("serviceworker")
     sw.evaluate("""self.created = []; const orig = chrome.notifications.create.bind(chrome.notifications);
         chrome.notifications.create = (id, o) => { self.created.push(o.title); return orig(id, o); }; 0""")  # trailing 0: else playwright calls the fn
+    sw.evaluate("chrome.storage.local.set({email: 'a@b.c', password: 'secret'}).then(() => 0)")
+    pages["tabs/cases/list/expired"].wait_for_timeout(35_000)
+    pages["tabs/cases/list/expired"].evaluate(f"location.href = '{B}login'")  # session expires after the 1st tick saw the list
     pages["login"].wait_for_timeout(70_000)
+    expired_url = pages["tabs/cases/list/expired"].url
 
     a = pages["tabs/cases/list/assigned"]
     clicks, hidden = a.evaluate("[window.clicks || 0, window.hidden || 0]")
@@ -51,7 +58,13 @@ with sync_playwright() as p:
     assert loads["tabs/cases/12345"] == 1, "an open case must never be touched"
     assert discardable is False, "list tab must be protected from Memory Saver"
     assert badge_lock == "LOCK"
-    assert sorted(notes) == sorted(["MDI: you were logged out", "MDI is locked",
-        "MDI: new assigned encounter", "MDI: new assigned encounter"]), notes  # count 1 -> 2 on both lists
+    assert expired_url == B + "tabs/cases/list/expired", f"after auto login back to the list, got {expired_url}"
+    assert notes.count("MDI: you were logged out") == 2 and "MDI is locked" in notes and "MDI: new assigned encounter" in notes, notes
+    assert "MDI: auto login failed" not in notes
+    log = sw.evaluate("chrome.storage.local.get('log').then(v => v.log)")
+    kinds = {k: sum(e["n"] for e in log if e["type"] == k) for k in ("refresh", "new", "login")}
+    print("24h log:", kinds)
+    assert kinds["refresh"] >= 4 and kinds["new"] >= 2 and kinds["login"] >= 2, kinds
+    assert sw.evaluate("chrome.storage.local.get('password').then(v => v.password)") == "secret"
     print("OK")
     ctx.close()
