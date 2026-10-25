@@ -12,6 +12,7 @@ unzip it, open `chrome://extensions`, turn on **Developer mode**, click **Load u
 - Mac notification on a new assigned encounter, on MDI's inactivity lock, and on logout.
 - Keeps the Mac from idle sleep while the list is open; protects the tab from Chrome's Memory Saver.
 - **Auto login:** click the extension icon, enter your MDI email + password. If MDI logs you out, it logs back in and returns to the list (max 3 tries, so a wrong password can't lock the account). The password is stored unencrypted on this computer, in Chrome's extension storage.
+- **Status and earnings:** the popup shows green/red status at a glance and, from your pay per case, estimated earnings for 24 h / 7 / 30 days.
 - Does **not** bypass MDI's 20-minute inactivity lock (a HIPAA safeguard).
 - No data leaves the computer.
 

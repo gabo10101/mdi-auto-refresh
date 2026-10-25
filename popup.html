@@ -1,21 +1,33 @@
 <!doctype html>
 <meta charset="utf-8">
 <style>
-  body { width: 270px; margin: 12px; font: 13px system-ui, sans-serif; color: #202124; }
-  .head { font-size: 15px; font-weight: 700; padding: 8px 10px; border-radius: 8px; background: #e6f4ea; color: #1a7f64; }
-  .head.bad { background: #fce8e6; color: #d93025; }
-  #lines div { margin: 6px 2px; } #lines .bad { color: #d93025; font-weight: 600; }
-  hr { border: 0; border-top: 1px solid #e0e0e0; margin: 12px 0; }
-  table { width: 100%; } td:last-child { text-align: right; font-weight: 600; }
+  :root { --ok: #1a7f64; --bad: #d93025; --text: #202124; --muted: #5f6368; --soft: #f1f3f4; --line: #e0e0e0; }
+  body { width: 280px; margin: 12px; font: 13px system-ui, sans-serif; color: var(--text); background: #fff; }
+  .head { font-size: 15px; font-weight: 700; padding: 8px 10px; border-radius: 8px; background: #e6f4ea; color: var(--ok); }
+  .head.bad { background: #fce8e6; color: var(--bad); }
+  #lines div { margin: 6px 2px; } #lines .bad { color: var(--bad); font-weight: 600; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 12px 0; }
+  .seg { display: flex; background: var(--soft); border-radius: 8px; padding: 3px; margin-bottom: 10px; }
+  .seg button { flex: 1; border: 0; background: none; padding: 5px 0; border-radius: 6px; font: inherit; color: var(--muted); cursor: pointer; }
+  .seg button.on { background: #fff; color: var(--text); font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, .15); }
+  #stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tile { background: var(--soft); border-radius: 10px; padding: 10px 12px; color: var(--muted); font-size: 12px; }
+  .tile b { display: block; font-size: 22px; color: var(--text); margin-bottom: 2px; font-variant-numeric: tabular-nums; }
+  .tile.money b { color: var(--ok); }
+  #logins { margin: 8px 2px 0; color: var(--muted); }
+  .pay { display: flex; align-items: center; justify-content: space-between; margin: 12px 2px 4px; }
+  #price { width: 80px; padding: 5px 6px; border: 1px solid var(--line); border-radius: 6px; font: inherit; text-align: right; }
   summary { cursor: pointer; font-weight: 600; }
-  input, button { width: 100%; box-sizing: border-box; margin: 4px 0; padding: 6px; }
-  small { color: #666; }
+  #auto input, #auto button { width: 100%; box-sizing: border-box; margin: 4px 0; padding: 6px; }
+  small { color: var(--muted); }
 </style>
 <div id="head" class="head"></div>
 <div id="lines"></div>
 <hr>
-<b>Last 24 hours</b>
-<table id="stats"></table>
+<div id="period" class="seg"></div>
+<div id="stats"></div>
+<div id="logins"></div>
+<label class="pay">Your pay per case <span>$ <input id="price" type="number" min="0" step="any" placeholder="0"></span></label>
 <hr>
 <details id="auto">
   <summary>Auto login: <span id="autostate"></span></summary>

@@ -73,10 +73,11 @@ with sync_playwright() as p:
     assert notes.count("MDI: you were logged out") == 2 and "MDI is locked" in notes and "MDI: new assigned encounter" in notes, notes
     assert "MDI: auto login failed" not in notes
     log = sw.evaluate("chrome.storage.local.get('log').then(v => v.log)")
-    kinds = {k: sum(e["n"] for e in log if e["type"] == k) for k in ("refresh", "new", "login")}
-    print("24h log:", kinds)
-    assert kinds["refresh"] >= 4 and kinds["new"] >= 2 and kinds["login"] >= 2, kinds
+    kinds = {k: sum(e["n"] for e in log if e["type"] == k) for k in ("new", "login")}
+    print("log:", kinds)
+    assert kinds["new"] >= 2 and kinds["login"] >= 2, kinds
     assert sw.evaluate("chrome.storage.local.get('password').then(v => v.password)") == "secret"
+    sw.evaluate("chrome.storage.local.set({price: 15}).then(() => 0)")
     popup = ctx.new_page()
     popup.goto(f"chrome-extension://{sw.url.split('/')[2]}/popup.html")
     popup.wait_for_timeout(1500)
@@ -84,5 +85,11 @@ with sync_playwright() as p:
     print("popup status:", status)
     assert "Needs you" in status and "Flagged: locked by MDI" in status and "Assigned: refreshed" in status, status
     assert "12345" not in status, "an open case is not listed"
+    stats = popup.inner_text("#stats")
+    print("popup stats:", stats)
+    assert f"${kinds['new'] * 15}" in stats, f"earnings = new cases x pay per case: {stats}"
+    popup.click("text=30 days")
+    popup.wait_for_timeout(300)
+    assert popup.inner_text("#period .on") == "30 days" and f"${kinds['new'] * 15}" in popup.inner_text("#stats")
     print("OK")
     ctx.close()

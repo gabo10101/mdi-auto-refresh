@@ -82,25 +82,23 @@
   </header>
 
   <a class="download" href="https://github.com/gabo10101/mdi-auto-refresh/releases/latest/download/mdi-auto-refresh.zip">⬇ Download MDI Auto Refresh (.zip)</a>
-  <p class="small">Version 1.2. For Google Chrome on Mac. Free, open source, about 2 minutes to set up. Not affiliated with or endorsed by MD Integrations.</p>
+  <p class="small">Version 1.3. For Google Chrome on Mac. Free, open source, about 2 minutes to set up. Not affiliated with or endorsed by MD Integrations.</p>
 
-  <div class="note"><strong>Already have the old version (1.1)?</strong> Don't install the new one next to it: both would click refresh and send double notifications. Do this first, it takes one minute:
+  <div class="note"><strong>Already using MDI Auto Refresh?</strong> Updating takes one minute, and your saved email and password stay:
     <ol>
-      <li>Open Chrome, type <code>chrome://extensions</code> in the address bar and press <kbd>Return</kbd>.</li>
-      <li>Find the card <strong>MDI Auto Refresh</strong> and click <strong>Remove</strong> (confirm with <strong>Remove</strong> again).</li>
-      <li>Open <em>Documents</em> and drag the old <code>mdi-auto-refresh</code> folder to the Trash.</li>
-      <li>Now follow <strong>Install (one time)</strong> below as if it were new. You will set up auto login in the next part.</li>
+      <li>Click the green <strong>Download</strong> button above, open <em>Downloads</em> and double-click <code>mdi-auto-refresh.zip</code>. You get a new <code>mdi-auto-refresh</code> folder.</li>
+      <li>Drag this new folder into <strong>Documents</strong> (where the old one is). The Mac asks whether to replace it: click <strong>Replace</strong>.</li>
+      <li>Open Chrome, type <code>chrome://extensions</code> in the address bar and press <kbd>Return</kbd>. On the <strong>MDI Auto Refresh</strong> card click the round arrow <strong>↻</strong>. The card now says version <strong>1.3</strong>.</li>
     </ol>
-    <span class="small">Nothing important is lost: version 1.1 saved no settings.</span></div>
+    <span class="small">That's all. Skip <strong>Install</strong> below, but do look at <strong>The extension window</strong>.</span></div>
 
   <h2>What it does</h2>
   <ul>
     <li>Every <strong>30 seconds</strong> it presses the same ⟳ button you would press on the <em>Encounters</em> list (Assigned, Flagged, Waiting Patient…).</li>
     <li>It <strong>never touches an open case</strong>, so a reply you are typing is never lost.</li>
     <li>It shows a <strong>Mac notification</strong> when a new encounter is assigned to you, when MDI locks itself, or when you are logged out.</li>
-    <li><strong>New in 1.2: auto login.</strong> If MDI logs you out, it types your email and password again, signs you back in and returns to the list you were on. You enter them once.</li>
-    <li><strong>New in 1.3: Status.</strong> Click the extension icon: the top shows each MDI tab and whether it is refreshing, locked or logged out, in red if something needs you.</li>
-    <li><strong>New in 1.2: 24-hour summary.</strong> Click the extension icon to see how many refreshes, new assigned encounters and automatic re-logins there were in the last 24 hours.</li>
+    <li><strong>Auto login.</strong> If MDI logs you out, it types your email and password again, signs you back in and returns to the list you were on. You enter them once.</li>
+    <li><strong>New in 1.3: status at a glance and estimated earnings.</strong> Click the extension icon: green means everything works, red tells you what needs you. Enter your pay per case once to see roughly how much you earned in the last 24 hours, 7 days or 30 days.</li>
     <li>It keeps the Mac from <strong>going to sleep</strong> while the Encounters list is open, and stops Chrome from putting that tab to sleep.</li>
   </ul>
 
@@ -145,7 +143,7 @@
     </li>
   </ol>
 
-  <h2>Set up auto login (one time)</h2>
+  <h2>Set up the extension (one time)</h2>
   <ol class="steps">
     <li>
       <h3>Click the extension icon</h3>
@@ -153,11 +151,28 @@
     </li>
     <li>
       <h3>Enter your MDI email and password</h3>
-      <p>Type them in the <strong>Auto login</strong> part and click <strong>Save</strong>. That's all: you never have to enter them again. The window then says <em>“Password saved ✓”</em> and never shows the password again.</p>
-      <p>To change it later, type the new password and click Save. <strong>Clear</strong> deletes both.</p>
+      <p>Type them in the <strong>Auto login</strong> part and click <strong>Save</strong>. That's all: you never have to enter them again. The part folds away and shows <em>“Auto login: on ✓”</em>. The password is never shown again.</p>
+      <p>To change it later, click <em>“Auto login: on ✓”</em>, type the new password and click Save. <strong>Clear</strong> deletes both.</p>
+    </li>
+    <li>
+      <h3>Enter your pay per case (optional)</h3>
+      <p>In the same window, type how much you earn for one case in <strong>Your pay per case</strong>, for example <code>15</code>. It saves by itself. From now on you see your estimated earnings.</p>
     </li>
   </ol>
   <div class="note"><strong>About your password.</strong> It is stored only in Chrome on this Mac and is used only on the MDI login page. It is not encrypted, so anyone using your unlocked Mac and Chrome profile could find it. Use auto login only on your own computer, and lock the screen when you leave. If MDI asks for an extra code (two-step verification) or a captcha, auto login can't get past that; then log in by hand. After 3 failed tries it stops by itself (so a wrong password can't lock your account) and sends a notification.</div>
+
+  <h2>The extension window</h2>
+  <p>Click the green ⟳ icon next to the address bar any time to see how things are going. Most days you won't need to.</p>
+  <img class="shot" src="img/popup.png" alt="The extension window: a green bar saying All good, refreshing; buttons for 24 h, 7 days and 30 days; 9 new cases and 135 dollars estimated earnings; pay per case 15 dollars; Auto login on" width="304" height="330" loading="lazy" style="max-width: 304px">
+  <p class="small">Example numbers.</p>
+  <table>
+    <tr><th>Part</th><th>What it tells you</th></tr>
+    <tr><td><strong>Green bar</strong></td><td><em>All good, refreshing.</em> Below it: each Encounters list and how many seconds ago it was refreshed.</td></tr>
+    <tr><td><strong>Red bar</strong></td><td><em>Needs you.</em> The red line below says why: MDI is locked (type your password in MDI), you are logged out, the Mac was asleep, or no Encounters list is open.</td></tr>
+    <tr><td><strong>24 h · 7 days · 30 days</strong></td><td>Click to choose the time period for the numbers below.</td></tr>
+    <tr><td><strong>New cases</strong></td><td>New assigned encounters the extension spotted.</td></tr>
+    <tr><td><strong>Est. earnings</strong></td><td>New cases × your pay per case. It is an estimate: it only counts cases that arrived while the Encounters list was open, and can miss one if a case is closed and a new one arrives within the same 30 seconds.</td></tr>
+  </table>
 
   <h2>Set up the Mac (one time)</h2>
   <ol class="steps">
@@ -190,7 +205,7 @@
   <div class="note"><strong>The 20-minute lock is MDI's own security feature.</strong> After 20 minutes without mouse or keyboard activity, MDI asks for your password. Medical privacy rules (HIPAA) require this automatic lock, so the extension deliberately does <em>not</em> get around it. The list keeps refreshing behind the lock screen, and you get a notification when it happens.</div>
   <ul>
     <li><strong>It only works while Chrome is open</strong> and the Mac is awake. If you quit Chrome, it starts again by itself the next time you open Chrome and the MDI list.</li>
-    <li><strong>It only runs on</strong> <code>app.mdintegrations.com</code>. It sends no data anywhere and uses no servers or accounts. It stores only your auto-login email and password, a count of what happened in the last 24 hours, and the last “Assigned” number, all on this computer. The full code is public on <a href="https://github.com/gabo10101/mdi-auto-refresh">GitHub</a>.</li>
+    <li><strong>It only runs on</strong> <code>app.mdintegrations.com</code>. It sends no data anywhere and uses no servers or accounts. It stores only your auto-login email and password, your pay per case, a count of new cases and re-logins in the last 30 days, and the last “Assigned” number, all on this computer. The full code is public on <a href="https://github.com/gabo10101/mdi-auto-refresh">GitHub</a>.</li>
     <li>New-case alerts use the <em>Assigned</em> number in MDI's left sidebar. They can arrive up to 30 seconds after the case.</li>
     <li>MDI also refreshes itself every 20 minutes. This extension just makes it much more frequent.</li>
     <li>Please use it only on your own MDI account, and follow your employer's rules.</li>
@@ -199,7 +214,7 @@
   <h2>Turn off, update, uninstall</h2>
   <ul>
     <li><strong>Pause:</strong> go to <code>chrome://extensions</code> and switch the MDI Auto Refresh card off. Switch it on again to resume.</li>
-    <li><strong>Update to a newer version:</strong> in <code>chrome://extensions</code> click <strong>Remove</strong> on the old card, move the old <code>mdi-auto-refresh</code> folder to the Trash, then install the new zip as described above. (Don't keep two versions switched on at the same time.) Your saved email and password are removed with the old version, so enter them once again.</li>
+    <li><strong>Update to a newer version:</strong> download the new zip, unzip it, drag the new <code>mdi-auto-refresh</code> folder into <em>Documents</em> and click <strong>Replace</strong>, then click <strong>↻</strong> on the card in <code>chrome://extensions</code>. Your settings stay.</li>
     <li><strong>Turn off only auto login:</strong> click the extension icon and press <strong>Clear</strong>. Refreshing continues as before.</li>
     <li><strong>Uninstall:</strong> click <strong>Remove</strong> on the card, then delete the folder. This also deletes the saved password.</li>
   </ul>
@@ -208,7 +223,9 @@
   <details><summary>The icon shows no badge</summary>
     <p>Make sure the tab is on an Encounters <em>list</em> (address contains <code>/tabs/cases/list/</code>), not inside a case. Wait 30 seconds. Check that the card in <code>chrome://extensions</code> is switched on.</p></details>
   <details><summary>Auto login didn't log me in</summary>
-    <p>Click the extension icon and check that it says “Password saved ✓” (if not, enter email and password and Save). Wait up to 30 seconds after the logout. If MDI asks for a verification code or captcha, or the password was wrong, you get a notification “auto login failed”: log in by hand. After fixing the password in the extension, it tries again by itself.</p></details>
+    <p>Click the extension icon and check that it says “Auto login: on ✓” (if it says “off”, enter email and password and Save). Wait up to 30 seconds after the logout. If MDI asks for a verification code or captcha, or the password was wrong, you get a notification “auto login failed”: log in by hand. After fixing the password in the extension, it tries again by itself.</p></details>
+  <details><summary>The window says “Needs you”</summary>
+    <p>Read the red line under it, it says what to do. If it says something you don't understand, take a screenshot of the window and send it to Gábor.</p></details>
   <details><summary>I don't get notifications</summary>
     <p>Check System Settings → Notifications → Google Chrome (step 1 of “Set up the Mac”). Also turn off <em>Focus / Do Not Disturb</em>.</p></details>
   <details><summary>Chrome says “Disable developer mode extensions”</summary>

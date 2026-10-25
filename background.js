@@ -54,7 +54,7 @@ chrome.alarms.onAlarm.addListener(async () => {
   const state = await chrome.storage.session.get(null); // per tab: last count / lock / login seen
   const { email, password, log = [] } = await chrome.storage.local.get(['email', 'password', 'log']);
   const now = Date.now();
-  const add = (type, n = 1) => log.push({ t: now, type, n }); // popup shows the last 24 h
+  const add = (type, n = 1) => log.push({ t: now, type, n }); // popup shows the last 24 h / 7 / 30 days
   for (const tab of tabs) {
     const s = state[tab.id] || {};
     if (isLogin(tab.url)) {
@@ -86,7 +86,6 @@ chrome.alarms.onAlarm.addListener(async () => {
         [{ result: r }] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: refreshPage });
       } catch (e) {}
       if (!r.clicked) chrome.tabs.reload(tab.id); // fallback: if the button ever changes, reload the page instead
-      if (r.clicked) add('refresh');
       if (r.locked && !s.locked) notify(tab.id, 'MDI is locked', 'Inactivity lock: enter your password to continue.');
       if (r.assigned > (s.assigned ?? Infinity)) notify(tab.id, 'MDI: new assigned encounter', `Assigned: ${r.assigned}`);
       if (r.assigned > (s.assigned ?? Infinity)) add('new', r.assigned - s.assigned);
@@ -102,7 +101,7 @@ chrome.alarms.onAlarm.addListener(async () => {
     state[tab.id] = s;
   }
   await chrome.storage.session.set(state);
-  await chrome.storage.local.set({ log: log.filter((e) => now - e.t < 864e5) });
+  await chrome.storage.local.set({ log: log.filter((e) => e.type !== 'refresh' && now - e.t < 30 * 864e5) }); // 'refresh': 1.2 entries
 });
 
 // New credentials from the popup: give auto login a fresh start.
