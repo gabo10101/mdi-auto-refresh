@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MDI Auto Refresh",
-  "version": "1.2",
+  "version": "1.3",
   "description": "Clicks the refresh button on the MD Integrations Encounters list every 30 seconds and logs back in if you get logged out.",
   "minimum_chrome_version": "120",
   "permissions": ["alarms", "scripting", "power", "notifications", "storage"],

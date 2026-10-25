@@ -1,19 +1,28 @@
 <!doctype html>
 <meta charset="utf-8">
 <style>
-  body { width: 260px; margin: 12px; font: 13px system-ui, sans-serif; }
-  input, button { width: 100%; box-sizing: border-box; margin: 4px 0 8px; padding: 6px; }
+  body { width: 270px; margin: 12px; font: 13px system-ui, sans-serif; color: #202124; }
+  .head { font-size: 15px; font-weight: 700; padding: 8px 10px; border-radius: 8px; background: #e6f4ea; color: #1a7f64; }
+  .head.bad { background: #fce8e6; color: #d93025; }
+  #lines div { margin: 6px 2px; } #lines .bad { color: #d93025; font-weight: 600; }
+  hr { border: 0; border-top: 1px solid #e0e0e0; margin: 12px 0; }
+  table { width: 100%; } td:last-child { text-align: right; font-weight: 600; }
+  summary { cursor: pointer; font-weight: 600; }
+  input, button { width: 100%; box-sizing: border-box; margin: 4px 0; padding: 6px; }
   small { color: #666; }
-  table { width: 100%; margin: 4px 0 8px; } td:last-child { text-align: right; font-weight: 600; }
 </style>
+<div id="head" class="head"></div>
+<div id="lines"></div>
+<hr>
 <b>Last 24 hours</b>
 <table id="stats"></table>
-<small>New encounters are counted at the refresh that spots them, so each was found within 30 s of appearing. What would have been missed without the extension can't be measured.</small>
 <hr>
-<b>Auto login</b><br>
-<input id="email" type="email" placeholder="MDI email" autocomplete="off">
-<input id="password" type="password" autocomplete="off">
-<button id="save">Save</button>
-<button id="clear">Clear</button>
-<small id="msg">Saved once, then fully automatic. Stored on this computer only; the saved password is never shown again.</small>
+<details id="auto">
+  <summary>Auto login: <span id="autostate"></span></summary>
+  <input id="email" type="email" placeholder="MDI email" autocomplete="off">
+  <input id="password" type="password" autocomplete="off">
+  <button id="save">Save</button>
+  <button id="clear">Clear</button>
+  <small id="msg">Saved once, then fully automatic. Stored on this computer only; the saved password is never shown again.</small>
+</details>
 <script src="popup.js"></script>

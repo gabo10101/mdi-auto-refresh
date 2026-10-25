@@ -19,7 +19,8 @@ Not affiliated with or endorsed by MD Integrations.
 
 ## Development
 
-`python3 tests/test_extension.py` loads the extension into Chromium (Playwright) against fake MDI pages (~70 s).
+`python3 tests/test_extension.py` loads the extension into Chromium (Playwright) against fake MDI pages (~105 s).
+`python3 tests/test_extension.py --demo` opens the same setup in a visible window to click around in.
 Release zip: `cd .. && zip -r mdi-auto-refresh.zip mdi-auto-refresh/{manifest.json,background.js,popup.html,popup.js,icon.png,LICENSE}`
 
 Made by **Gábor Kiss** · [MIT License](LICENSE)

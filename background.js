@@ -13,7 +13,9 @@ function refreshPage() {
   const btn = page?.querySelector('ion-icon[name="reload-outline"]')?.closest('ion-button');
   btn?.click(); // same as the user clicking ⟳ (MDI runs getEncounters("hard"))
   const n = document.querySelector('[tour="assigned-encounters"]')?.textContent.match(/(\d+)\s*$/);
-  return { clicked: !!btn, assigned: n ? +n[1] : null, locked: !!document.querySelector('app-inactivity-lock-modal') };
+  // The lock modal can stay in the DOM hidden after unlocking, so only a visible one counts.
+  const locked = [...document.querySelectorAll('app-inactivity-lock-modal')].some((m) => m.checkVisibility({ opacityProperty: true, visibilityProperty: true }));
+  return { clicked: !!btn, assigned: n ? +n[1] : null, locked };
 }
 
 // Runs inside the MDI login page. Fills the form like a user would (Angular needs the input events) and submits.
@@ -74,6 +76,7 @@ chrome.alarms.onAlarm.addListener(async () => {
       if (s.login && s.list && !isList(tab.url)) chrome.tabs.update(tab.id, { url: s.list }); // just logged in: back to the list
     }
     s.login = isLogin(tab.url);
+    s.seen = now; // the popup's Status shows when each tab was last checked
 
     if (isList(tab.url)) {
       s.list = tab.url;
@@ -91,6 +94,7 @@ chrome.alarms.onAlarm.addListener(async () => {
       if (r.assigned != null) s.assigned = r.assigned;
 
       const how = r.clicked ? 'refresh button' : 'page reload';
+      Object.assign(s, { refreshed: now, how });
       chrome.action.setBadgeText({ tabId: tab.id, text: r.locked ? 'LOCK' : r.clicked ? 'ON' : 'R' });
       chrome.action.setBadgeBackgroundColor({ tabId: tab.id, color: r.locked ? '#d93025' : '#1a7f64' });
       chrome.action.setTitle({ tabId: tab.id, title: `MDI Auto Refresh — last: ${new Date().toLocaleTimeString()} (${how})` });
